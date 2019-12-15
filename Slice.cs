@@ -6,6 +6,7 @@ namespace BBT
 {
     public sealed class Slice<T>
     {
+        public delegate bool Compare(T _obj);
         Dictionary<float,T> m_data;
 
         public int Count
@@ -51,6 +52,51 @@ namespace BBT
             {
                 m_data = _data;
             }
+        }
+
+        public void Clear()
+        {
+            m_data.Clear();
+        }
+
+        public int Remove(float _index,int _count=1)
+        {
+            var keys = sort(_index);
+            int length = Math.Min(keys.Count,m_data.Count);
+            for (int i = 0; i < length; i++)
+            {
+                m_data.Remove(keys[i]);
+            }
+            return length;
+        }
+
+        public int RemoveRange(float _min,int _max)
+        {
+            var datas = m_data.GetEnumerator();
+            int count=0;
+            while(datas.MoveNext())
+            {
+                if(datas.Current.Key >= _min && datas.Current.Key <= _max)
+                {
+                    count++;
+                    m_data.Remove(datas.Current.Key);
+                }
+            }
+            return count;
+        }
+
+        public List<float> Find(Compare _compare)
+        {
+            List<float> idxs = new List<float>();
+            var kvs = m_data.GetEnumerator();
+            while (kvs.MoveNext())
+            {
+                if(_compare(kvs.Current.Value))
+                {
+                    idxs.Add(kvs.Current.Key);
+                }
+            }
+            return idxs;
         }
 
         List<float> sort(float _index)
